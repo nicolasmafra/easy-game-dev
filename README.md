@@ -1,7 +1,6 @@
 # easy-game-dev
-Jogo Web 3D simples. Acesse [aqui](https://nickmafra.github.io/easy-game-dev/public/game/)
+Jogo Web 2D simples.
 
 Objetivos deste projeto:
-- Ser jogável pelo pessoal aqui da minha casa: todos na mesma TV, com joysticks conectados ao notebook.
-- Ser no mínimo divertido
 - Ter o código mais simples possível
+- Isolar o conceito da implementação
