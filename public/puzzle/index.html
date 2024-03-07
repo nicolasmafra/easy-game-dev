@@ -57,11 +57,25 @@ function update(state, action) {
     }
 }
 
-function shuffle(state, count = 1000) {
+function shuffle(state) {
+    let count = 100 * state.length;
     for (var i = 0; i < count; i++) {
         let action = actions[Math.floor(actions.length * Math.random())];
         update(state, action);
     }
+}
+
+function originalPosition(value) {
+    let col = value % cols;
+    let row = (value - col) / cols;
+    return { row, col };
+}
+
+function calcColor(position) {
+    let r = 100 + Math.round(100*position.row/(rows-1));
+    let g = 100 + Math.round(100*position.col/(cols-1));
+    let b = 255 - (r + g - 200);
+    return `rgb(${r},${g},${b})`;
 }
 
 function draw(state) {
@@ -70,7 +84,7 @@ function draw(state) {
         if (cell.v) {
             let x = offset + cell.col * gridSize;
             let y = offset + cell.row * gridSize;
-            ctx.fillStyle = 'gray';
+            ctx.fillStyle = calcColor(originalPosition(cell.v));
             ctx.fillRect(x - cellSize/2, y - cellSize/2, cellSize, cellSize);
             ctx.fillStyle = 'black';
             ctx.fillText(cell.v, x, y);
@@ -92,12 +106,15 @@ let rows = parseInt(params.get("rows"));
 let cols = parseInt(params.get("cols"));
 
 if (!rows || !cols) {
-    params.set("rows", "3");
-    params.set("cols", "3");
+    params.set("rows", "4");
+    params.set("cols", "4");
     window.location.search = params.toString();
 } else {
     currentState = generateState(rows, cols);
-    shuffle(currentState);
     draw(currentState);
+    setTimeout(() => {
+        shuffle(currentState);
+        draw(currentState);
+    }, 500)
 }
 </script>
