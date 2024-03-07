@@ -15,50 +15,89 @@ const gridSize = 40;
 const cellSize = gridSize - 2;
 const offset = gridSize;
 
-let state = [0,1,2,3,4,5,6,7,8].sort(() => Math.random() - 0.5);
+const actions = [
+    { col:  1, row:  0 },
+    { col:  0, row:  1 },
+    { col: -1, row:  0 },
+    { col:  0, row: -1 },
+];
+let keyMapping = {
+    "ArrowRight": actions[0],
+    "ArrowDown": actions[1],
+    "ArrowLeft": actions[2],
+    "ArrowUp": actions[3],
+}
 
-function draw() {
+function generateState(rows, cols) {
+    let newState = [];
+    let value = 0;
+    for (var i = 0; i < rows; i++) {
+        for (var j = 0; j < cols; j++) {
+            newState.push({
+                row: i,
+                col: j,
+                v: value,
+            });
+            value++;
+        }
+    }
+    return newState;
+}
+
+function update(state, action) {
+    let emptyCell = state.find(x => x.v == 0);
+    let col = emptyCell.col - action.col;
+    let row = emptyCell.row - action.row;
+
+    let movedCell = state.find(x => x.row == row && x.col == col);
+    
+    if (movedCell) {
+        emptyCell.v = movedCell.v;
+        movedCell.v = 0;
+    }
+}
+
+function shuffle(state, count = 1000) {
+    for (var i = 0; i < count; i++) {
+        let action = actions[Math.floor(actions.length * Math.random())];
+        update(state, action);
+    }
+}
+
+function draw(state) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    state.forEach((v, i) => {
-        if (v != 0) {
-            let col = i % 3;
-            let row = (i - col) / 3;
-            let x = offset + col * gridSize;
-            let y = offset + row * gridSize;
+    state.forEach(cell => {
+        if (cell.v) {
+            let x = offset + cell.col * gridSize;
+            let y = offset + cell.row * gridSize;
             ctx.fillStyle = 'gray';
             ctx.fillRect(x - cellSize/2, y - cellSize/2, cellSize, cellSize);
             ctx.fillStyle = 'black';
-            ctx.fillText(v, x, y);
+            ctx.fillText(cell.v, x, y);
         }
     });
 }
 
-draw();
-
 document.addEventListener('keydown', (e) => {
-    let i = state.indexOf(0);
-    let col = i % 3;
-    let row = (i - col) / 3;
-    switch (e.code) {
-        case 'ArrowUp':
-            if (row < 2) swap(i, i + 3);
-            break;
-        case 'ArrowDown':
-            if (row > 0) swap(i, i - 3);
-            break;
-        case 'ArrowLeft':
-            if (col < 2) swap(i, i + 1);
-            break;
-        case 'ArrowRight':
-            if (col > 0) swap(i, i - 1);
-            break;
+    let action = keyMapping[e.code];
+    if (action) {
+        update(currentState, action);
+        draw(currentState);
     }
-    draw();
 });
 
-function swap(i, j) {
-    let temp = state[i];
-    state[i] = state[j];
-    state[j] = temp;
+let currentState;
+let params = new URLSearchParams(window.location.search);
+let rows = parseInt(params.get("rows"));
+let cols = parseInt(params.get("cols"));
+
+if (!rows || !cols) {
+    params.set("rows", "3");
+    params.set("cols", "3");
+    window.location.search = params.toString();
+} else {
+    currentState = generateState(rows, cols);
+    shuffle(currentState);
+    draw(currentState);
 }
 </script>
