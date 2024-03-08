@@ -7,7 +7,7 @@ const actions = [
 
 function generateState(rows, cols) {
     let newState = [];
-    let value = 0;
+    let value = 1;
     for (var i = 0; i < rows; i++) {
         for (var j = 0; j < cols; j++) {
             newState.push({
@@ -18,6 +18,7 @@ function generateState(rows, cols) {
             value++;
         }
     }
+    newState[newState.length - 1].v = 0;
     return newState;
 }
 
@@ -43,6 +44,7 @@ function shuffle(state) {
 }
 
 function originalPosition(value) {
+    value--;
     let col = value % cols;
     let row = (value - col) / cols;
     return { row, col };
